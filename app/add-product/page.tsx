@@ -36,7 +36,6 @@ export default function AddProduct() {
       }
       
       if (user) {
-        // ใช้ rpc แทนการ query ตรง
         const { data, error: roleError } = await supabase
           .rpc('get_user_role', {
             user_id: user.id
@@ -77,7 +76,6 @@ export default function AddProduct() {
     }
 
     setImageFile(file)
-    // สร้าง URL สำหรับแสดงตัวอย่างรูปภาพ
     const previewUrl = URL.createObjectURL(file)
     setImagePreview(previewUrl)
   }

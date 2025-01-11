@@ -18,15 +18,12 @@ export default function LoginPage() {
       setLoading(true)
       setError('')
   
-      // เพิ่ม console.log เพื่อตรวจสอบค่าที่ส่งไป
       console.log('Attempting login with:', { email, password })
   
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       })
-  
-      // เพิ่ม console.log เพื่อดูผลลัพธ์
       console.log('Sign in result:', { data, signInError })
   
       if (signInError) throw signInError

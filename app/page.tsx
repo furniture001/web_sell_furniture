@@ -13,7 +13,6 @@ export default function Page() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // ย้าย fetchProducts ออกมานอก useEffect
   const fetchProducts = async () => {
     try {
       const { data, error } = await supabase
@@ -61,7 +60,7 @@ export default function Page() {
     }
 
     checkAdminStatus()
-    fetchProducts() // เรียกใช้ฟังก์ชันที่ย้ายออกมา
+    fetchProducts()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       checkAdminStatus()
@@ -76,7 +75,7 @@ export default function Page() {
     <main className="container mx-auto px-4 relative min-h-screen pb-16"
     style={{padding:'50px 100px 50px 100px'}}>
       <Header />
-      <div className="my-8">
+      <div className="my-8" style={{background:"#f0f0f0", padding:"10px", borderRadius:"8px", marginTop:"10px"}}>
         {loading ? (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

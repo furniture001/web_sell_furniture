@@ -10,7 +10,6 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // ดึงข้อมูล user ปัจจุบัน
     const getCurrentUser = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser()

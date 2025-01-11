@@ -119,7 +119,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen" >
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
@@ -127,14 +127,14 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" >
         <div className="text-center text-gray-500">ไม่พบสินค้า</div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8" style={{paddingLeft:"150px", paddingRight:"150px"}}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* รูปสินค้า */}
         <div>

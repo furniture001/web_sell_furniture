@@ -62,7 +62,7 @@ export default function ProductCard({ product, isAdmin = false, onProductDeleted
   }
 
   return (
-    <div className="border rounded-lg p-4 relative">
+    <div className="border rounded-lg p-4 relative" style={{background:"white"}}>
       {isAdmin && (
         <button onClick={handleDelete} className="absolute top-2 right-2...">
           <X size={20} />
