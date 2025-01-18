@@ -21,8 +21,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, isAdmin = false, onProductDeleted }: ProductCardProps) {
-  // ลบ state ที่ไม่ได้ใช้งาน
-  const [deleting, setDeleting] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const handleDelete = async () => {
     try {
@@ -30,7 +29,7 @@ export default function ProductCard({ product, isAdmin = false, onProductDeleted
         return
       }
 
-      setDeleting(true)
+      setLoading(true)
 
       // ลบสินค้าจาก database
       const { error } = await supabase
@@ -61,7 +60,7 @@ export default function ProductCard({ product, isAdmin = false, onProductDeleted
         alert('เกิดข้อผิดพลาดในการลบสินค้า')
       }
     } finally {
-      setDeleting(false)
+      setLoading(false)
     }
   }
 
@@ -69,8 +68,10 @@ export default function ProductCard({ product, isAdmin = false, onProductDeleted
     <div className="border rounded-lg p-4 relative" style={{background:"white"}}>
       {isAdmin && (
         <button 
-          onClick={handleDelete} 
-          className="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors"
+          onClick={handleDelete}
+          disabled={loading}
+          className={`absolute top-2 right-2 text-gray-500 hover:text-red-500 
+            transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           aria-label="ลบสินค้า"
         >
           <X size={20} />
