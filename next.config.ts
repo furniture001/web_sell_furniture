@@ -6,7 +6,14 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   images: {
-    domains: ['palpldkegsdwfpqytlgb.supabase.co'], // เพิ่ม domain ของ Supabase storage
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'palpldkegsdwfpqytlgb.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   }
 };
 

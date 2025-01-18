@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '../components/Navbar'
-import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
   title: 'ร้านเฟอร์นิเจอร์',
@@ -14,11 +14,9 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
-  
   try {
-    // We only need to check if session exists, no need to use the session data
+    const supabase = createServerComponentClient({ cookies })
+
     await supabase.auth.getSession()
 
     return (
@@ -31,7 +29,6 @@ export default async function RootLayout({
     )
   } catch (error) {
     console.error('Layout error:', error)
-    // ถ้าเกิดข้อผิดพลาดก็ยังแสดง UI ปกติ
     return (
       <html lang="th">
         <body className="antialiased">
