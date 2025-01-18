@@ -7,30 +7,42 @@ import type { User } from '@supabase/supabase-js'
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // ดึงข้อมูล user เพียงครั้งเดียวตอน mount
     const getCurrentUser = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
-        if (error) throw error
+        const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
+        
+        if (user) {
+          const { data: role } = await supabase
+            .rpc('get_user_role', {
+              user_id: user.id
+            })
+          setIsAdmin(role === 'admin')
+        }
       } catch (error) {
         console.error('Error fetching user:', error)
       } finally {
         setLoading(false)
       }
     }
-
-    // เริ่มต้นดึงข้อมูล user
+  
     getCurrentUser()
-
-    // subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null)
+  
+    // ใช้ subscription เฉพาะสำหรับการเปลี่ยนแปลงสถานะ auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setIsAdmin(false)
+      } else if (event === 'SIGNED_IN') {
+        getCurrentUser()
+      }
     })
-
-    // cleanup subscription
+  
     return () => {
       subscription.unsubscribe()
     }
@@ -41,6 +53,7 @@ export default function Navbar() {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       setUser(null)
+      setIsAdmin(false)
     } catch (error) {
       console.error('Error signing out:', error)
     }
@@ -56,13 +69,15 @@ export default function Navbar() {
         <div className="flex items-center space-x-4">
           {user ? (
             <>
-              {/* เพิ่มลิงก์ประวัติการสั่งซื้อตรงนี้ */}
-              <Link 
-                href="/orders"
-                className="text-white hover:text-gray-200"
-              >
-                ประวัติการสั่งซื้อ
-              </Link>
+              {/* แสดงลิงก์ประวัติการสั่งซื้อเฉพาะผู้ใช้ที่ไม่ใช่ admin */}
+              {!isAdmin && (
+                <Link 
+                  href="/orders"
+                  className="text-white hover:text-gray-200"
+                >
+                  ประวัติการสั่งซื้อ
+                </Link>
+              )}
               <span className="text-white">
                 สวัสดี, {user.email}
               </span>

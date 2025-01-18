@@ -1,5 +1,5 @@
 'use client'
-//app
+
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -33,47 +33,30 @@ export default function Page() {
     const checkAdminStatus = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        console.log('1. ผู้ใช้ปัจจุบัน:', user)
-
-        if (!user) {
-          console.log('2. ไม่พบข้อมูลผู้ใช้')
-          return
+        
+        if (user) {
+          const { data } = await supabase
+            .rpc('get_user_role', {
+              user_id: user.id
+            })
+          setIsAdmin(data === 'admin')
+        } else {
+          setIsAdmin(false)
         }
-
-        const { data, error } = await supabase
-          .rpc('get_user_role', {
-            user_id: user.id
-          })
-
-        console.log('3. ข้อมูล role:', data)
-        console.log('4. ข้อผิดพลาด:', error)
-
-        if (error) {
-          console.error('5. เกิดข้อผิดพลาดในการดึง role:', error)
-          return
-        }
-
-        setIsAdmin(data === 'admin')
       } catch (error) {
-        console.error('6. เกิดข้อผิดพลาดในการตรวจสอบสถานะ:', error)
+        console.error('Error checking admin status:', error)
+        setIsAdmin(false)
       }
     }
 
+    // เรียกใช้เพียงครั้งเดียวตอน mount
     checkAdminStatus()
     fetchProducts()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAdminStatus()
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
   }, [])
 
   return (
     <main className="container mx-auto px-4 relative min-h-screen pb-16"
-    style={{padding:'50px 100px 50px 100px'}}>
+      style={{padding:'50px 100px 50px 100px'}}>
       <Header />
       <div className="my-8" style={{background:"#f0f0f0", padding:"10px", borderRadius:"8px", marginTop:"10px"}}>
         {loading ? (
