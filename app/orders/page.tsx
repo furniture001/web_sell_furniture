@@ -20,12 +20,13 @@ export default function OrdersPage() {
   const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    fetchOrders()
+    checkUserAccess()
   }, [])
 
-  const fetchOrders = async () => {
+  const checkUserAccess = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -34,6 +35,33 @@ export default function OrdersPage() {
         return
       }
 
+      // ตรวจสอบว่าเป็น admin หรือไม่
+      const { data: role, error: roleError } = await supabase
+        .rpc('get_user_role', {
+          user_id: user.id
+        })
+
+      if (roleError) {
+        throw roleError
+      }
+
+      // ถ้าเป็น admin ให้ redirect ไปหน้าแรก
+      if (role === 'admin') {
+        router.push('/')
+        return
+      }
+
+      // ถ้าไม่ใช่ admin ให้ดึงข้อมูล orders
+      await fetchOrders(user.id)
+      
+    } catch (error) {
+      console.error('Error checking access:', error)
+      router.push('/')
+    }
+  }
+
+  const fetchOrders = async (userId: string) => {
+    try {
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -44,7 +72,7 @@ export default function OrdersPage() {
             image_url
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -66,7 +94,7 @@ export default function OrdersPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">ประวัติการสั่งซื้อ</h1>
+      <h1 className="text-2xl font-bold mb-6">ประวัติการสั่งซื้อของฉัน</h1>
 
       <div className="space-y-4">
         {orders.map((order) => (
