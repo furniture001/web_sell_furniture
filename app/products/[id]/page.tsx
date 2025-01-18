@@ -5,7 +5,7 @@ interface SearchParams {
   [key: string]: string | string[] | undefined
 }
 
-interface PageProps<T = {}, S = SearchParams> {
+interface PageProps<T extends Record<string, unknown>, S extends SearchParams = SearchParams> {
   params: T
   searchParams: S
 }
