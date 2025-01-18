@@ -1,19 +1,29 @@
 import { Metadata } from 'next'
 import ProductDetails from './ProductDetails'
 
-type Props = {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
+interface SearchParams {
+  [key: string]: string | string[] | undefined
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+interface PageProps<T = {}, S = SearchParams> {
+  params: T
+  searchParams: S
+}
+
+interface ProductPageParams {
+  id: string
+}
+
+export async function generateMetadata({ 
+  params 
+}: PageProps<ProductPageParams>): Promise<Metadata> {
   return {
     title: `สินค้า - ${params.id}`,
   }
 }
 
-export default async function ProductPage({ params }: Props) {
-  return (
-    <ProductDetails productId={params.id} />
-  )
+export default function ProductPage({ 
+  params 
+}: PageProps<ProductPageParams>) {
+  return <ProductDetails productId={params.id} />
 }
