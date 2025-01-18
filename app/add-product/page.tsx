@@ -1,5 +1,4 @@
 'use client'
-//add-product
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
@@ -28,10 +27,9 @@ export default function AddProduct() {
   const checkAdminStatus = async () => {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
-      console.log('1. ข้อมูลผู้ใช้:', user)
-  
+      
       if (userError) {
-        console.error('2. เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้:', userError)
+        console.error('เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้:', userError)
         return
       }
       
@@ -41,18 +39,17 @@ export default function AddProduct() {
             user_id: user.id
           })
   
-        console.log('3. ข้อมูล role:', data)
-  
         if (roleError) {
-          console.error('4. เกิดข้อผิดพลาดในการดึง role:', roleError)
+          console.error('เกิดข้อผิดพลาดในการดึง role:', roleError)
           return
         }
   
-        console.log('5. สถานะ admin:', data === 'admin')
         setIsAdmin(data === 'admin')
       }
-    } catch (error) {
-      console.error('6. เกิดข้อผิดพลาดในการตรวจสอบสถานะ admin:', error)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('เกิดข้อผิดพลาดในการตรวจสอบสถานะ admin:', error.message)
+      }
     }
   }
 
@@ -141,10 +138,8 @@ export default function AddProduct() {
       setLoading(true)
       setError('')
 
-      // อัพโหลดรูปภาพ
       const imageUrl = await uploadImage(imageFile!)
 
-      // เพิ่มข้อมูลสินค้า
       const { error: insertError } = await supabase
         .from('products')
         .insert([
@@ -162,9 +157,13 @@ export default function AddProduct() {
 
       router.push('/')
       router.refresh()
-    } catch (error: any) {
-      console.error('Error adding product:', error)
-      setError('เกิดข้อผิดพลาดในการเพิ่มสินค้า: ' + error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error adding product:', error)
+        setError('เกิดข้อผิดพลาดในการเพิ่มสินค้า: ' + error.message)
+      } else {
+        setError('เกิดข้อผิดพลาดในการเพิ่มสินค้า')
+      }
     } finally {
       setLoading(false)
     }

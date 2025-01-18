@@ -29,9 +29,8 @@ export default async function RootLayout({
   const supabase = createServerComponentClient({ cookies: () => cookieStore })
   
   try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    // We only need to check if session exists, no need to use the session data
+    await supabase.auth.getSession()
 
     return (
       <html lang="th">

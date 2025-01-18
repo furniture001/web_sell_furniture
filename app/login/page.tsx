@@ -1,5 +1,4 @@
 'use client'
-//login
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -18,21 +17,22 @@ export default function LoginPage() {
       setLoading(true)
       setError('')
   
-      console.log('Attempting login with:', { email, password })
-  
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       })
-      console.log('Sign in result:', { data, signInError })
   
       if (signInError) throw signInError
   
       router.push('/')
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error)
-      setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+      if (error instanceof Error) {
+        setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง: ' + error.message)
+      } else {
+        setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
+      }
     } finally {
       setLoading(false)
     }

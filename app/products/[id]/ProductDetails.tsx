@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
+import Image from 'next/image'
 
 interface Product {
   id: string
@@ -28,14 +29,12 @@ export default function ProductDetails({ productId }: Props) {
 
   useEffect(() => {
     fetchProduct()
-  }, [productId])
+  }, [productId])  // เพิ่ม dependency productId
 
   const fetchProduct = async () => {
     try {
       setLoading(true)
       setError(null)
-
-      console.log('Fetching product with ID:', productId) // Debug log
 
       const { data, error } = await supabase
         .from('products')
@@ -44,17 +43,16 @@ export default function ProductDetails({ productId }: Props) {
         .single()
 
       if (error) {
-        console.error('Error fetching product:', error) // Debug log
         throw error
       }
 
-      console.log('Product data:', data) // Debug log
-
       setProduct(data)
       setQuantity(1)
-    } catch (err) {
-      console.error('Error:', err)
-      setError('ไม่สามารถโหลดข้อมูลสินค้าได้')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error:', error.message)
+        setError('ไม่สามารถโหลดข้อมูลสินค้าได้')
+      }
     } finally {
       setLoading(false)
     }
@@ -118,8 +116,10 @@ export default function ProductDetails({ productId }: Props) {
       alert('สั่งซื้อสำเร็จ')
       router.push('/orders')
       
-    } catch (err) {
-      console.error('Error purchasing:', err)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error purchasing:', error.message)
+      }
       alert('เกิดข้อผิดพลาดในการสั่งซื้อ')
     } finally {
       setBuying(false)
@@ -153,11 +153,12 @@ export default function ProductDetails({ productId }: Props) {
   return (
     <div className="container mx-auto px-4 py-8" style={{paddingLeft:"150px", paddingRight:"150px"}}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <img
+        <div className="relative h-[400px]">
+          <Image
             src={product.image_url}
             alt={product.name}
-            className="w-full rounded-lg shadow-lg"
+            fill
+            className="rounded-lg shadow-lg object-cover"
           />
         </div>
 

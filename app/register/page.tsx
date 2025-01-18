@@ -1,5 +1,4 @@
 'use client'
-//register
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -21,11 +20,11 @@ export default function RegisterPage() {
 
       // 1. สร้าง auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
+        email: email.trim(),
+        password: password.trim(),
         options: {
           data: {
-            name: name,
+            name: name.trim(),
           }
         }
       })
@@ -39,8 +38,8 @@ export default function RegisterPage() {
           .insert([
             {
               id: authData.user.id,
-              name,
-              email,
+              name: name.trim(),
+              email: email.trim(),
             }
           ])
 
@@ -49,8 +48,12 @@ export default function RegisterPage() {
 
       // ไปที่หน้า login
       router.push('/login')
-    } catch (error: any) {
-      setError(error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError('เกิดข้อผิดพลาดในการสมัครสมาชิก: ' + error.message)
+      } else {
+        setError('เกิดข้อผิดพลาดในการสมัครสมาชิก')
+      }
     } finally {
       setLoading(false)
     }

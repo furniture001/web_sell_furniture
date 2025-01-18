@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
@@ -22,8 +21,10 @@ export default function Page() {
       
       if (error) throw error
       setProducts(data || [])
-    } catch (error) {
-      console.error('Error fetching products:', error)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error fetching products:', error.message)
+      }
     } finally {
       setLoading(false)
     }
@@ -43,8 +44,10 @@ export default function Page() {
         } else {
           setIsAdmin(false)
         }
-      } catch (error) {
-        console.error('Error checking admin status:', error)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('Error checking admin status:', error.message)
+        }
         setIsAdmin(false)
       }
     }

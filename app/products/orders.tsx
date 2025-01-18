@@ -1,8 +1,9 @@
 'use client'
-//products
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import Image from 'next/image'
 
 interface Order {
   id: string
@@ -23,7 +24,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders()
-  }, [])
+  }, [router]) // เพิ่ม router เป็น dependency
 
   const fetchOrders = async () => {
     try {
@@ -48,9 +49,11 @@ export default function OrdersPage() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setOrders(data)
-    } catch (error) {
-      console.error('Error fetching orders:', error)
+      setOrders(data || [])
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error fetching orders:', error.message)
+      }
     } finally {
       setLoading(false)
     }
@@ -72,11 +75,14 @@ export default function OrdersPage() {
         {orders.map((order) => (
           <div key={order.id} className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-4">
-              <img
-                src={order.products.image_url}
-                alt={order.products.name}
-                className="w-20 h-20 object-cover rounded"
-              />
+              <div className="relative w-20 h-20">
+                <Image
+                  src={order.products.image_url}
+                  alt={order.products.name}
+                  fill
+                  className="object-cover rounded"
+                />
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold">{order.products.name}</h3>
                 <p className="text-gray-600">

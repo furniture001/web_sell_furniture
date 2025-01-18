@@ -8,7 +8,6 @@ import type { User } from '@supabase/supabase-js'
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // ดึงข้อมูล user เพียงครั้งเดียวตอน mount
@@ -24,10 +23,10 @@ export default function Navbar() {
             })
           setIsAdmin(role === 'admin')
         }
-      } catch (error) {
-        console.error('Error fetching user:', error)
-      } finally {
-        setLoading(false)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('Error fetching user:', error.message)
+        }
       }
     }
   
@@ -54,8 +53,10 @@ export default function Navbar() {
       if (error) throw error
       setUser(null)
       setIsAdmin(false)
-    } catch (error) {
-      console.error('Error signing out:', error)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error signing out:', error.message)
+      }
     }
   }
 

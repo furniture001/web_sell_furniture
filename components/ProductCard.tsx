@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import Link from 'next/link'
+import Image from 'next/image'
+
 interface Product {
   id: number
   name: string
@@ -19,7 +21,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, isAdmin = false, onProductDeleted }: ProductCardProps) {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  // ลบ state ที่ไม่ได้ใช้งาน
   const [deleting, setDeleting] = useState(false)
 
   const handleDelete = async () => {
@@ -53,9 +55,11 @@ export default function ProductCard({ product, isAdmin = false, onProductDeleted
         onProductDeleted()
       }
 
-    } catch (error) {
-      console.error('Error deleting product:', error)
-      alert('เกิดข้อผิดพลาดในการลบสินค้า')
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error deleting product:', error.message)
+        alert('เกิดข้อผิดพลาดในการลบสินค้า')
+      }
     } finally {
       setDeleting(false)
     }
@@ -64,23 +68,30 @@ export default function ProductCard({ product, isAdmin = false, onProductDeleted
   return (
     <div className="border rounded-lg p-4 relative" style={{background:"white"}}>
       {isAdmin && (
-        <button onClick={handleDelete} className="absolute top-2 right-2...">
+        <button 
+          onClick={handleDelete} 
+          className="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors"
+          aria-label="ลบสินค้า"
+        >
           <X size={20} />
         </button>
       )}
   
       <Link href={`/products/${product.id}`}>
         <div className="cursor-pointer">
-          <img 
-            src={product.image_url} 
-            alt={product.name}
-            className="w-full h-48 object-cover rounded mb-4 hover:opacity-90 transition-opacity"
-          />
+          <div className="relative w-full h-48 mb-4">
+            <Image 
+              src={product.image_url} 
+              alt={product.name}
+              fill
+              className="object-cover rounded hover:opacity-90 transition-opacity"
+            />
+          </div>
           <h2 className="text-xl font-semibold">{product.name}</h2>
           <p className="text-gray-600 mb-2">{product.description}</p>
           <p className="text-lg font-bold">฿{product.price.toLocaleString()}</p>
           <p className="text-sm text-gray-500">สินค้าคงเหลือ: {product.stock}</p>
-          <span className="inline-block bg-gray-200 rounded-full px-3 py-1...">
+          <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm text-gray-700 mt-2">
             {product.category}
           </span>
         </div>
