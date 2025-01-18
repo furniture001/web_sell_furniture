@@ -5,7 +5,6 @@ interface PageProps {
   params: {
     id: string
   }
-  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export function generateMetadata({ params }: PageProps): Metadata {
@@ -14,6 +13,6 @@ export function generateMetadata({ params }: PageProps): Metadata {
   }
 }
 
-export default function ProductPage({ params, searchParams }: PageProps) {
+export default function ProductPage({ params }: PageProps) {
   return <ProductDetails productId={params.id} />
 }
