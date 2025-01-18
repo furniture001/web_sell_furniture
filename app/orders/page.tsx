@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import Image from 'next/image'
@@ -21,13 +21,33 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
-  // ลบ isAdmin และ setIsAdmin เนื่องจากไม่ได้ใช้งาน
+  // ย้าย fetchOrders มาเป็น useCallback เพื่อป้องกัน infinite loop
+  const fetchOrders = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          products (
+            name,
+            price,
+            image_url
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
 
-  useEffect(() => {
-    checkUserAccess()
-  }, [])  // เพิ่ม checkUserAccess ใน dependencies
+      if (error) throw error
+      setOrders(data || [])
+    } catch (error) {
+      console.error('Error fetching orders:', error instanceof Error ? error.message : 'Unknown error')
+    } finally {
+      setLoading(false)
+    }
+  }, []) // ไม่มี dependencies เพราะไม่ได้ใช้ state หรือ props ภายใน
 
-  const checkUserAccess = async () => {
+  // ย้าย checkUserAccess มาเป็น useCallback
+  const checkUserAccess = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -55,39 +75,16 @@ export default function OrdersPage() {
       // ถ้าไม่ใช่ admin ให้ดึงข้อมูล orders
       await fetchOrders(user.id)
       
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error checking access:', error.message)
-      }
+    } catch (error) {
+      console.error('Error checking access:', error instanceof Error ? error.message : 'Unknown error')
       router.push('/')
     }
-  }
+  }, [router, fetchOrders]) // เพิ่ม dependencies ที่จำเป็น
 
-  const fetchOrders = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          products (
-            name,
-            price,
-            image_url
-          )
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setOrders(data || [])
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error fetching orders:', error.message)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
+  // แก้ไข useEffect ให้มี dependencies ที่ถูกต้อง
+  useEffect(() => {
+    checkUserAccess()
+  }, [checkUserAccess])
 
   if (loading) {
     return (

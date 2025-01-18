@@ -1,6 +1,5 @@
 'use client'
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import Image from 'next/image'
@@ -22,11 +21,8 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchOrders()
-  }, [router]) // เพิ่ม router เป็น dependency
-
-  const fetchOrders = async () => {
+  // สร้าง fetchOrders เป็น useCallback
+  const fetchOrders = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -50,14 +46,17 @@ export default function OrdersPage() {
 
       if (error) throw error
       setOrders(data || [])
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error fetching orders:', error.message)
-      }
+    } catch (error) {
+      console.error('Error fetching orders:', error instanceof Error ? error.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
-  }
+  }, [router]) // เพิ่ม router เป็น dependency เพราะมีการใช้ router.push
+
+  // กำหนด useEffect ให้มี dependency ที่ถูกต้อง
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
 
   if (loading) {
     return (

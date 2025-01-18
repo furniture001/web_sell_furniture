@@ -1,6 +1,5 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+'use client';
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import Image from 'next/image'
@@ -27,11 +26,8 @@ export default function ProductDetails({ productId }: Props) {
   const [buying, setBuying] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchProduct()
-  }, [productId])  // เพิ่ม dependency productId
-
-  const fetchProduct = async () => {
+  // แปลง fetchProduct เป็น useCallback
+  const fetchProduct = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -48,15 +44,17 @@ export default function ProductDetails({ productId }: Props) {
 
       setProduct(data)
       setQuantity(1)
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error:', error.message)
-        setError('ไม่สามารถโหลดข้อมูลสินค้าได้')
-      }
+    } catch (error) {
+      console.error('Error:', error instanceof Error ? error.message : 'Unknown error')
+      setError('ไม่สามารถโหลดข้อมูลสินค้าได้')
     } finally {
       setLoading(false)
     }
-  }
+  }, [productId]) // เพิ่ม productId เป็น dependency
+
+  useEffect(() => {
+    fetchProduct()
+  }, [fetchProduct])
 
   const handleBuy = async () => {
     if (!product) return
@@ -116,10 +114,8 @@ export default function ProductDetails({ productId }: Props) {
       alert('สั่งซื้อสำเร็จ')
       router.push('/orders')
       
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error purchasing:', error.message)
-      }
+    } catch (error) {
+      console.error('Error purchasing:', error instanceof Error ? error.message : 'Unknown error')
       alert('เกิดข้อผิดพลาดในการสั่งซื้อ')
     } finally {
       setBuying(false)
